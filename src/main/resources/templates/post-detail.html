@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>모집글 | 팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/board.css}">
+</head>
+<body class="app">
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="container">
+    <section class="panel">
+        <div class="post-top">
+                <span th:class="${post.recruiting} ? 'badge badge-open' : 'badge badge-closed'"
+                      th:text="${post.recruiting} ? '모집중' : '마감'">모집중</span>
+            <span class="dday" th:text="${post.ddayLabel}">D-3</span>
+        </div>
+
+        <h1 th:text="${post.title}">제목</h1>
+
+        <p class="post-meta">
+            작성자
+            <a th:href="@{/profile/{id}(id=${post.author.id})}" th:text="${post.author.nickname}">작성자</a>
+            · 작성일 <span th:text="${post.createdDate}">2026-11-23</span>
+        </p>
+
+        <dl class="info">
+            <dt>모집 인원</dt>
+            <dd th:text="${post.capacity} + '명'">3명</dd>
+
+            <dt>모집 마감일</dt>
+            <dd th:text="${post.deadline}">2026-12-01</dd>
+
+            <dt>필요한 기술 태그</dt>
+            <dd>
+                <span class="chip" th:each="tag : ${post.tags}" th:text="${tag.name}">Java</span>
+                <span class="muted" th:if="${#lists.isEmpty(post.tags)}">지정하지 않음</span>
+            </dd>
+
+            <dt>내용</dt>
+            <dd class="pre" th:text="${post.content}">내용</dd>
+        </dl>
+
+        <div class="actions" th:if="${isAuthor}">
+            <a th:href="@{/posts/{id}/edit(id=${post.id})}" class="btn-link no-margin">수정</a>
+            <form th:action="@{/posts/{id}/delete(id=${post.id})}" method="post"
+                  onsubmit="return confirm('이 모집글을 삭제할까요?');">
+                <button type="submit" class="btn-danger">삭제</button>
+            </form>
+        </div>
+    </section>
+
+    <section class="panel comments">
+        <h2>댓글 <span th:text="${#lists.size(comments)}">0</span></h2>
+
+        <p class="muted" th:if="${#lists.isEmpty(comments)}">첫 댓글을 남겨 보세요.</p>
+
+        <div class="comment" th:each="comment : ${comments}">
+            <div class="comment-head">
+                <a th:href="@{/profile/{id}(id=${comment.author.id})}" th:text="${comment.author.nickname}">작성자</a>
+                <span class="muted" th:text="${comment.createdText}">2026-11-23 12:00</span>
+                <form th:if="${comment.author.id == meId}"
+                      th:action="@{/posts/{pid}/comments/{cid}/delete(pid=${post.id},cid=${comment.id})}"
+                      method="post" class="inline">
+                    <button type="submit" class="link-btn">삭제</button>
+                </form>
+            </div>
+            <p class="pre" th:text="${comment.content}">댓글</p>
+        </div>
+
+        <form th:action="@{/posts/{id}/comments(id=${post.id})}" method="post" class="comment-form">
+            <textarea name="content" rows="3" maxlength="500" placeholder="댓글을 입력하세요 (500자 이하)" required></textarea>
+            <button type="submit" class="btn btn-sm">댓글 등록</button>
+        </form>
+    </section>
+
+    <p><a th:href="@{/}" class="back">← 목록으로</a></p>
+</main>
+</body>
+</html>
