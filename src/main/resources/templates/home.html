@@ -4,21 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>팀 프로젝트 매칭</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body>
-<div class="card">
-    <div class="brand">
-        <span class="brand-icon">🤝</span>
-        <span>팀 프로젝트 매칭</span>
-    </div>
+<body class="app">
+<div th:replace="~{fragments :: navbar}"></div>
 
-    <h1>환영합니다</h1>
-    <p class="sub"><span th:text="${nickname}"></span>님, 로그인되었습니다.</p>
+<main class="container">
+    <section class="panel">
+        <h1><span th:text="${nickname}">이름</span>님, 환영합니다</h1>
 
-    <form th:action="@{/logout}" method="post">
-        <button type="submit" class="btn btn-outline">로그아웃</button>
-    </form>
-</div>
+        <div th:if="${!hasProfile}" class="notice">
+            <p>아직 프로필이 없습니다. 팀원을 찾거나 지원하려면 먼저 프로필을 작성하세요.</p>
+            <a th:href="@{/profile/edit}" class="btn-link">프로필 작성하기</a>
+        </div>
+
+        <p th:if="${hasProfile}" class="muted">모집글 목록은 다음 단계에서 이 화면에 추가됩니다.</p>
+    </section>
+</main>
 </body>
 </html>

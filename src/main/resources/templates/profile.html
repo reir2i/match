@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>프로필 | 팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="app">
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="container">
+    <section class="panel">
+        <h1 th:text="${member.nickname}">이름</h1>
+        <p class="muted" th:text="'학번 ' + ${member.username}">학번</p>
+
+        <p th:if="${profile == null}" class="muted">아직 프로필을 작성하지 않았습니다.</p>
+
+        <div th:if="${profile != null}">
+            <dl class="info">
+                <dt>학과</dt>
+                <dd th:text="${profile.department}">컴퓨터공학부</dd>
+
+                <dt>학년</dt>
+                <dd th:text="${profile.grade} + '학년'">4학년</dd>
+
+                <dt>기술 태그</dt>
+                <dd>
+                    <span class="chip" th:each="tag : ${profile.tags}" th:text="${tag.name}">Java</span>
+                    <span class="muted" th:if="${#lists.isEmpty(profile.tags)}">선택한 태그가 없습니다.</span>
+                </dd>
+
+                <dt>자기소개</dt>
+                <dd class="pre" th:text="${profile.intro}">소개</dd>
+
+                <dt th:if="${profile.githubUrl != null and !#strings.isEmpty(profile.githubUrl)}">GitHub</dt>
+                <dd th:if="${profile.githubUrl != null and !#strings.isEmpty(profile.githubUrl)}">
+                    <a th:href="${profile.githubUrl}" th:text="${profile.githubUrl}" target="_blank" rel="noopener">링크</a>
+                </dd>
+
+                <dt th:if="${mine}">이메일 (나에게만 보임)</dt>
+                <dd th:if="${mine}" th:text="${#strings.isEmpty(profile.email) ? '입력하지 않음' : profile.email}">메일</dd>
+            </dl>
+        </div>
+
+        <a th:if="${mine}" th:href="@{/profile/edit}" class="btn-link">프로필 수정</a>
+    </section>
+</main>
+</body>
+</html>
