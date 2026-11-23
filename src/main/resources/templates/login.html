@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>로그인 | 팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="card">
+    <div class="brand">
+        <span class="brand-icon">🤝</span>
+        <span>팀 프로젝트 매칭</span>
+    </div>
+
+    <h1>로그인</h1>
+    <p class="sub">학번과 비밀번호를 입력하세요.</p>
+
+    <p class="msg-error" th:if="${param.error}">학번 또는 비밀번호가 올바르지 않습니다.</p>
+    <p class="msg-ok" th:if="${param.signup}">가입이 완료되었습니다. 로그인해 주세요.</p>
+    <p class="msg-ok" th:if="${param.logout}">로그아웃되었습니다.</p>
+
+    <form th:action="@{/login}" method="post">
+        <label for="username">학번</label>
+        <input type="text" id="username" name="username" placeholder="학번 입력" required autofocus>
+
+        <label for="password">비밀번호</label>
+        <input type="password" id="password" name="password" placeholder="비밀번호 입력" required>
+
+        <button type="submit" class="btn">로그인</button>
+    </form>
+
+    <p class="link-row">계정이 없으신가요? <a th:href="@{/signup}">회원가입</a></p>
+</div>
+</body>
+</html>

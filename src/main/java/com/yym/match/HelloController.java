@@ -13,11 +13,6 @@ public class HelloController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @GetMapping("/")
-    public String hello() {
-        return "Team Match is running on EC2!";
-    }
-
     @GetMapping("/db")
     public String db() {
         String name = jdbcTemplate.queryForObject("SELECT DATABASE()", String.class);

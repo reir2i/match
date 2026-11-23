@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="card">
+    <div class="brand">
+        <span class="brand-icon">🤝</span>
+        <span>팀 프로젝트 매칭</span>
+    </div>
+
+    <h1>환영합니다</h1>
+    <p class="sub"><span th:text="${nickname}"></span>님, 로그인되었습니다.</p>
+
+    <form th:action="@{/logout}" method="post">
+        <button type="submit" class="btn btn-outline">로그아웃</button>
+    </form>
+</div>
+</body>
+</html>
