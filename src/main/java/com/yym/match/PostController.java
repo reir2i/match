@@ -25,15 +25,18 @@ public class PostController {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final TagRepository tagRepository;
+    private final ApplicationRepository applicationRepository;
 
     public PostController(MemberRepository memberRepository,
                           PostRepository postRepository,
                           CommentRepository commentRepository,
-                          TagRepository tagRepository) {
+                          TagRepository tagRepository,
+                          ApplicationRepository applicationRepository) {
         this.memberRepository = memberRepository;
         this.postRepository = postRepository;
         this.commentRepository = commentRepository;
         this.tagRepository = tagRepository;
+        this.applicationRepository = applicationRepository;
     }
 
     private Member currentMember(Principal principal) {
@@ -118,11 +121,19 @@ public class PostController {
     public String detail(@PathVariable("id") Long id, Principal principal, Model model) {
         Member me = currentMember(principal);
         Post post = findPost(id);
+        boolean isAuthor = post.getAuthor().getId().equals(me.getId());
 
         model.addAttribute("post", post);
         model.addAttribute("comments", commentRepository.findByPostIdOrderByCreatedAtAsc(id));
-        model.addAttribute("isAuthor", post.getAuthor().getId().equals(me.getId()));
+        model.addAttribute("isAuthor", isAuthor);
         model.addAttribute("meId", me.getId());
+
+        model.addAttribute("applications",
+                isAuthor ? applicationRepository.findByPostIdOrderByCreatedAtAsc(id) : List.of());
+        model.addAttribute("myApplication",
+                applicationRepository.findByPostIdAndApplicantId(id, me.getId()).orElse(null));
+        model.addAttribute("acceptedCount",
+                applicationRepository.countByPostIdAndStatus(id, Application.Status.ACCEPTED));
         return "post-detail";
     }
 
@@ -172,6 +183,7 @@ public class PostController {
         Post post = findPost(id);
         checkAuthor(post, me);
 
+        applicationRepository.deleteByPostId(id);
         postRepository.delete(post);
         return "redirect:/";
     }

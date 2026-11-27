@@ -1,0 +1,93 @@
+.flash {
+    margin: 0 0 16px;
+}
+
+.msg-ok {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-size: 14px;
+}
+
+.apply {
+    margin-top: 20px;
+}
+
+.apply h2 {
+    margin: 0 0 14px;
+    font-size: 20px;
+}
+
+.status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-accepted {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.status-rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.applicant {
+    padding: 14px 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.applicant-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.applicant-head a {
+    color: #1f2937;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.applicant p {
+    margin: 8px 0 0;
+}
+
+.applicant-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.applicant-actions form {
+    margin: 0;
+}
+
+.applicant-actions .btn {
+    margin-top: 0;
+}
+
+.post-card.static:hover {
+    border-color: #e5e7eb;
+}
+
+.post-card.static h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.post-card.static form {
+    margin: 12px 0 0;
+}

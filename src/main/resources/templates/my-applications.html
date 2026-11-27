@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>내 지원 | 팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/board.css}">
+    <link rel="stylesheet" th:href="@{/css/apply.css}">
+</head>
+<body class="app">
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="container">
+    <p class="msg-ok flash" th:if="${msg}" th:text="${msg}"></p>
+    <p class="msg-error flash" th:if="${error}" th:text="${error}"></p>
+
+    <div class="board-head">
+        <h1>내 지원 현황</h1>
+    </div>
+
+    <p class="muted empty" th:if="${#lists.isEmpty(applications)}">아직 지원한 모집글이 없습니다.</p>
+
+    <div class="post-card static" th:each="app : ${applications}">
+        <div class="post-top">
+            <span th:class="'status ' + ${app.statusClass}" th:text="${app.statusLabel}">대기중</span>
+            <span class="dday" th:text="${app.createdText}">2026-11-27 19:00</span>
+        </div>
+        <h3><a th:href="@{/posts/{id}(id=${app.post.id})}" th:text="${app.post.title}">제목</a></h3>
+        <p class="post-meta">
+            작성자 <span th:text="${app.post.author.nickname}">작성자</span> ·
+            <span th:text="${app.post.recruiting} ? '모집중' : '마감'">모집중</span>
+        </p>
+        <p class="pre muted" th:if="${!#strings.isEmpty(app.message)}" th:text="${app.message}"></p>
+
+        <form th:if="${app.pending}" th:action="@{/applications/{id}/cancel(id=${app.id})}" method="post">
+            <button type="submit" class="btn-danger">지원 취소</button>
+        </form>
+    </div>
+</main>
+</body>
+</html>

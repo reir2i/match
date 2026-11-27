@@ -6,11 +6,15 @@
     <title>모집글 | 팀 프로젝트 매칭</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <link rel="stylesheet" th:href="@{/css/board.css}">
+    <link rel="stylesheet" th:href="@{/css/apply.css}">
 </head>
 <body class="app">
 <div th:replace="~{fragments :: navbar}"></div>
 
 <main class="container">
+    <p class="msg-ok flash" th:if="${msg}" th:text="${msg}"></p>
+    <p class="msg-error flash" th:if="${error}" th:text="${error}"></p>
+
     <section class="panel">
         <div class="post-top">
                 <span th:class="${post.recruiting} ? 'badge badge-open' : 'badge badge-closed'"
@@ -28,7 +32,7 @@
 
         <dl class="info">
             <dt>모집 인원</dt>
-            <dd th:text="${post.capacity} + '명'">3명</dd>
+            <dd><span th:text="${acceptedCount}">0</span> / <span th:text="${post.capacity}">3</span>명 (수락 / 모집)</dd>
 
             <dt>모집 마감일</dt>
             <dd th:text="${post.deadline}">2026-12-01</dd>
@@ -46,9 +50,61 @@
         <div class="actions" th:if="${isAuthor}">
             <a th:href="@{/posts/{id}/edit(id=${post.id})}" class="btn-link no-margin">수정</a>
             <form th:action="@{/posts/{id}/delete(id=${post.id})}" method="post"
-                  onsubmit="return confirm('이 모집글을 삭제할까요?');">
+                  onsubmit="return confirm('이 모집글을 삭제할까요? 지원 내역도 함께 삭제됩니다.');">
                 <button type="submit" class="btn-danger">삭제</button>
             </form>
+        </div>
+    </section>
+
+    <section class="panel apply" th:unless="${isAuthor}">
+        <h2>지원하기</h2>
+
+        <div th:if="${myApplication != null}">
+            <p>내 지원 상태:
+                <span th:class="'status ' + ${myApplication.statusClass}" th:text="${myApplication.statusLabel}">대기중</span>
+            </p>
+            <p class="pre muted" th:if="${!#strings.isEmpty(myApplication.message)}" th:text="${myApplication.message}"></p>
+            <form th:if="${myApplication.pending}"
+                  th:action="@{/applications/{id}/cancel(id=${myApplication.id})}" method="post">
+                <button type="submit" class="btn-danger">지원 취소</button>
+            </form>
+        </div>
+
+        <div th:if="${myApplication == null and post.recruiting}">
+            <form th:action="@{/posts/{id}/apply(id=${post.id})}" method="post">
+                    <textarea name="message" rows="3" maxlength="300"
+                              placeholder="간단한 지원 메시지 (300자 이하, 선택)"></textarea>
+                <button type="submit" class="btn btn-sm">지원하기</button>
+            </form>
+        </div>
+
+        <p class="muted" th:if="${myApplication == null and !post.recruiting}">모집이 마감되었습니다.</p>
+    </section>
+
+    <section class="panel apply" th:if="${isAuthor}">
+        <h2>지원자
+            <span th:text="${#lists.size(applications)}">0</span>명 ·
+            수락 <span th:text="${acceptedCount}">0</span> / <span th:text="${post.capacity}">3</span>
+        </h2>
+
+        <p class="muted" th:if="${#lists.isEmpty(applications)}">아직 지원자가 없습니다.</p>
+
+        <div class="applicant" th:each="app : ${applications}">
+            <div class="applicant-head">
+                <a th:href="@{/profile/{id}(id=${app.applicant.id})}" th:text="${app.applicant.nickname}">이름</a>
+                <span th:class="'status ' + ${app.statusClass}" th:text="${app.statusLabel}">대기중</span>
+                <span class="muted" th:text="${app.createdText}">2026-11-27 19:00</span>
+            </div>
+            <p class="pre" th:if="${!#strings.isEmpty(app.message)}" th:text="${app.message}"></p>
+
+            <div class="applicant-actions" th:if="${app.pending}">
+                <form th:action="@{/applications/{id}/accept(id=${app.id})}" method="post">
+                    <button type="submit" class="btn btn-sm">수락</button>
+                </form>
+                <form th:action="@{/applications/{id}/reject(id=${app.id})}" method="post">
+                    <button type="submit" class="btn-danger">거절</button>
+                </form>
+            </div>
         </div>
     </section>
 
