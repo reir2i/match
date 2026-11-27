@@ -2,13 +2,14 @@ package com.yym.match;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
+import java.time.LocalDate;
 
 @Controller
 public class HomeController {
@@ -27,6 +28,7 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(@RequestParam(value = "page", defaultValue = "0") int page,
+                       @RequestParam(value = "open", defaultValue = "false") boolean onlyOpen,
                        Principal principal, Model model) {
 
         memberRepository.findByUsername(principal.getName()).ifPresent(m -> {
@@ -34,9 +36,15 @@ public class HomeController {
             model.addAttribute("hasProfile", profileRepository.findByMemberId(m.getId()).isPresent());
         });
 
-        Page<Post> posts = postRepository.findAll(
-                PageRequest.of(Math.max(page, 0), 10, Sort.by(Sort.Direction.DESC, "createdAt")));
+        Pageable pageable = PageRequest.of(Math.max(page, 0), 10);
+        LocalDate today = LocalDate.now();
+
+        Page<Post> posts = onlyOpen
+                ? postRepository.findRecruiting(Post.Status.OPEN, today, pageable)
+                : postRepository.findAllRecruitingFirst(Post.Status.OPEN, today, pageable);
+
         model.addAttribute("posts", posts);
+        model.addAttribute("onlyOpen", onlyOpen);
         return "home";
     }
 }
