@@ -12,15 +12,18 @@ public class ApplicationService {
     private final PostRepository postRepository;
     private final ProfileRepository profileRepository;
     private final NotificationService notificationService;
+    private final ChatMessageRepository chatMessageRepository;
 
     public ApplicationService(ApplicationRepository applicationRepository,
                               PostRepository postRepository,
                               ProfileRepository profileRepository,
-                              NotificationService notificationService) {
+                              NotificationService notificationService,
+                              ChatMessageRepository chatMessageRepository) {
         this.applicationRepository = applicationRepository;
         this.postRepository = postRepository;
         this.profileRepository = profileRepository;
         this.notificationService = notificationService;
+        this.chatMessageRepository = chatMessageRepository;
     }
 
     private Application findApplication(Long id) {
@@ -31,6 +34,21 @@ public class ApplicationService {
     private void checkPostAuthor(Application application, Member me) {
         if (!application.getPost().getAuthor().getId().equals(me.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+    }
+
+    private void openChatRoom(Post post) {
+        chatMessageRepository.save(ChatMessage.system(post,
+                "모집이 마감되어 채팅방이 열렸습니다. 카카오톡 오픈채팅 링크나 연락처를 공유해 보세요."));
+
+        String text = "\"" + post.getTitle() + "\" 모집이 마감되어 채팅방이 열렸습니다.";
+        String link = "/posts/" + post.getId() + "/chat";
+
+        notificationService.push(post.getAuthor(), Notification.Type.CHAT, text, link);
+        for (Application a : applicationRepository.findByPostIdOrderByCreatedAtAsc(post.getId())) {
+            if (a.getStatus() == Application.Status.ACCEPTED) {
+                notificationService.push(a.getApplicant(), Notification.Type.CHAT, text, link);
+            }
         }
     }
 
@@ -80,13 +98,15 @@ public class ApplicationService {
         }
 
         application.accept();
-        if (accepted + 1 >= post.getCapacity()) {
-            post.close();
-        }
 
         notificationService.push(application.getApplicant(), Notification.Type.ACCEPT,
                 "\"" + post.getTitle() + "\" 지원이 수락되었습니다.",
                 "/posts/" + post.getId());
+
+        if (accepted + 1 >= post.getCapacity()) {
+            post.close();
+            openChatRoom(post);
+        }
         return post.getId();
     }
 

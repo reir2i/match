@@ -23,7 +23,8 @@ public class Notification {
         APPLY("지원", "새 지원이 들어왔습니다."),
         ACCEPT("수락", "지원이 수락되었습니다."),
         REJECT("거절", "지원이 거절되었습니다."),
-        MESSAGE("쪽지", "새 쪽지가 도착했습니다.");
+        MESSAGE("쪽지", "새 쪽지가 도착했습니다."),
+        CHAT("채팅", "채팅방이 열렸습니다.");
 
         private final String label;
         private final String mailLine;

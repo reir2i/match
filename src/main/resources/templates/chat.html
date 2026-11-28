@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>채팅방 | 팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/board.css}">
+    <style>
+        .chat-info { margin: 0 0 14px; padding: 12px 14px; border-radius: 10px; background: #f3f1ff; font-size: 14px; color: #4c3dc4; }
+        .members { margin: 8px 0 0; }
+        .leader { margin-left: 4px; font-size: 11px; color: #5b4bdb; font-weight: 700; }
+        .chat-box {
+            height: 420px;
+            margin: 16px 0;
+            padding: 16px;
+            overflow-y: auto;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+        }
+        .chat-row { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 12px; }
+        .chat-row.mine { align-items: flex-end; }
+        .chat-name { margin-bottom: 3px; font-size: 12px; color: #6b7280; }
+        .chat-bubble {
+            max-width: 75%;
+            padding: 10px 14px;
+            border-radius: 14px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        .chat-row.mine .chat-bubble { background: #5b4bdb; border-color: #5b4bdb; color: #ffffff; }
+        .chat-row.mine .chat-bubble a { color: #ffffff; }
+        .chat-bubble a { color: #4c3dc4; }
+        .chat-time { margin-top: 3px; font-size: 11px; color: #9ca3af; }
+        .chat-sys { margin: 8px 0 14px; text-align: center; font-size: 13px; color: #6b7280; }
+        .chat-form { display: flex; gap: 10px; align-items: flex-end; }
+        .chat-form textarea { flex: 1; }
+        .chat-form .btn { width: auto; margin-top: 0; padding: 14px 24px; }
+    </style>
+</head>
+<body class="app">
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="container">
+    <section class="panel">
+        <h1>💬 채팅방</h1>
+        <p class="muted">
+            <a th:href="@{/posts/{id}(id=${post.id})}" th:text="${post.title}">모집글 제목</a>
+        </p>
+
+        <div class="chat-info">
+            이 방은 작성자와 수락된 지원자만 볼 수 있습니다. 카카오톡 오픈채팅 링크나 연락처를 공유해 보세요.
+        </div>
+
+        <div class="members">
+                <span class="chip" th:each="m : ${members}">
+                    <span th:text="${m.nickname}">이름</span><span class="leader" th:if="${m.id == post.author.id}">방장</span>
+                </span>
+        </div>
+
+        <div id="chat-box" class="chat-box" th:attr="data-post=${post.id},data-last=${lastId}">
+            <th:block th:each="m : ${messages}">
+                <div class="chat-sys" th:if="${m.system}">
+                    <span class="chat-text" th:text="${m.content}">안내</span>
+                </div>
+                <div th:unless="${m.system}"
+                     th:class="${m.sender.id == meId} ? 'chat-row mine' : 'chat-row'">
+                    <span class="chat-name" th:text="${m.sender.nickname}">이름</span>
+                    <span class="chat-bubble"><span class="chat-text" th:text="${m.content}">내용</span></span>
+                    <span class="chat-time" th:text="${m.timeText}">11-28 10:00</span>
+                </div>
+            </th:block>
+        </div>
+
+        <form class="chat-form" th:action="@{/posts/{id}/chat(id=${post.id})}" method="post">
+            <textarea name="content" rows="2" maxlength="500" placeholder="메시지를 입력하세요 (500자 이하)" required></textarea>
+            <button type="submit" class="btn">보내기</button>
+        </form>
+    </section>
+
+    <p><a th:href="@{/posts/{id}(id=${post.id})}" class="back">← 모집글로</a></p>
+</main>
+
+<script>
+    (function () {
+        var box = document.getElementById('chat-box');
+        var postId = box.getAttribute('data-post');
+        var lastId = parseInt(box.getAttribute('data-last'), 10) || 0;
+        var urlPattern = /(https?:\/\/[^\s]+)/g;
+
+        function linkify(el, text) {
+            el.textContent = '';
+            var last = 0;
+            var m;
+            urlPattern.lastIndex = 0;
+            while ((m = urlPattern.exec(text)) !== null) {
+                if (m.index > last) {
+                    el.appendChild(document.createTextNode(text.slice(last, m.index)));
+                }
+                var a = document.createElement('a');
+                a.href = m[0];
+                a.textContent = m[0];
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                el.appendChild(a);
+                last = m.index + m[0].length;
+            }
+            if (last < text.length) {
+                el.appendChild(document.createTextNode(text.slice(last)));
+            }
+        }
+
+        function span(cls, text) {
+            var s = document.createElement('span');
+            s.className = cls;
+            s.textContent = text;
+            return s;
+        }
+
+        function addLine(line) {
+            var wrap = document.createElement('div');
+            if (line.system) {
+                wrap.className = 'chat-sys';
+                var t = span('chat-text', '');
+                linkify(t, line.content);
+                wrap.appendChild(t);
+            } else {
+                wrap.className = line.mine ? 'chat-row mine' : 'chat-row';
+                var bubble = span('chat-bubble', '');
+                var text = span('chat-text', '');
+                linkify(text, line.content);
+                bubble.appendChild(text);
+                wrap.appendChild(span('chat-name', line.sender));
+                wrap.appendChild(bubble);
+                wrap.appendChild(span('chat-time', line.time));
+            }
+            box.appendChild(wrap);
+        }
+
+        function scrollDown() {
+            box.scrollTop = box.scrollHeight;
+        }
+
+        document.querySelectorAll('.chat-text').forEach(function (el) {
+            linkify(el, el.textContent);
+        });
+        scrollDown();
+
+        function poll() {
+            fetch('/posts/' + postId + '/chat/messages?after=' + lastId, { credentials: 'same-origin' })
+                .then(function (res) { return res.ok ? res.json() : []; })
+                .then(function (lines) {
+                    if (!lines || !lines.length) { return; }
+                    var nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+                    lines.forEach(function (line) {
+                        addLine(line);
+                        lastId = line.id;
+                    });
+                    if (nearBottom) { scrollDown(); }
+                })
+                .catch(function () { });
+        }
+
+        setInterval(poll, 3000);
+    })();
+</script>
+</body>
+</html>
