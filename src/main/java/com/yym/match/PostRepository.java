@@ -10,17 +10,19 @@ import java.time.LocalDate;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    @Query(value = "select p from Post p "
+    @Query(value = "select p from Post p where "
+            + "(p.title like concat('%', :keyword, '%') or p.content like concat('%', :keyword, '%')) "
+            + "and (:tagId = 0 or exists (select 1 from p.tags t where t.id = :tagId)) "
+            + "and (:onlyOpen = false or (p.status = :open and p.deadline >= :today)) "
             + "order by case when (p.status = :open and p.deadline >= :today) then 0 else 1 end, p.createdAt desc",
-            countQuery = "select count(p) from Post p")
-    Page<Post> findAllRecruitingFirst(@Param("open") Post.Status open,
-                                      @Param("today") LocalDate today,
-                                      Pageable pageable);
-
-    @Query(value = "select p from Post p "
-            + "where p.status = :open and p.deadline >= :today order by p.createdAt desc",
-            countQuery = "select count(p) from Post p where p.status = :open and p.deadline >= :today")
-    Page<Post> findRecruiting(@Param("open") Post.Status open,
-                              @Param("today") LocalDate today,
-                              Pageable pageable);
+            countQuery = "select count(p) from Post p where "
+                    + "(p.title like concat('%', :keyword, '%') or p.content like concat('%', :keyword, '%')) "
+                    + "and (:tagId = 0 or exists (select 1 from p.tags t where t.id = :tagId)) "
+                    + "and (:onlyOpen = false or (p.status = :open and p.deadline >= :today))")
+    Page<Post> search(@Param("keyword") String keyword,
+                      @Param("tagId") long tagId,
+                      @Param("onlyOpen") boolean onlyOpen,
+                      @Param("open") Post.Status open,
+                      @Param("today") LocalDate today,
+                      Pageable pageable);
 }
