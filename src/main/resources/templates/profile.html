@@ -44,6 +44,7 @@
         </div>
 
         <a th:if="${mine}" th:href="@{/profile/edit}" class="btn-link">프로필 수정</a>
+        <a th:unless="${mine}" th:href="@{/messages/new(to=${member.id})}" class="btn-link">쪽지 보내기</a>
     </section>
 </main>
 </body>

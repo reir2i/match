@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>쪽지 | 팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/board.css}">
+    <link rel="stylesheet" th:href="@{/css/apply.css}">
+    <link rel="stylesheet" th:href="@{/css/message.css}">
+</head>
+<body class="app">
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="container">
+    <p class="msg-ok flash" th:if="${msg}" th:text="${msg}"></p>
+
+    <div class="board-head">
+        <h1>쪽지</h1>
+        <a th:href="@{/messages/new}" class="btn-link no-margin">쪽지 쓰기</a>
+    </div>
+
+    <div class="tabs">
+        <a th:href="@{/messages}" th:classappend="${box == 'inbox'} ? 'on'">받은 쪽지</a>
+        <a th:href="@{/messages/sent}" th:classappend="${box == 'sent'} ? 'on'">보낸 쪽지</a>
+    </div>
+
+    <p class="muted empty" th:if="${#lists.isEmpty(messages)}">쪽지가 없습니다.</p>
+
+    <a class="msg-row" th:each="m : ${messages}"
+       th:classappend="${box == 'inbox' and !m.checked} ? 'unread'"
+       th:href="@{/messages/{id}(id=${m.id})}">
+        <span class="msg-who" th:text="${box == 'inbox' ? m.sender.nickname : m.receiver.nickname}">이름</span>
+        <span class="msg-preview" th:text="${m.preview}">내용 미리보기</span>
+        <span class="msg-time" th:text="${m.createdText}">2026-11-28 10:00</span>
+    </a>
+</main>
+</body>
+</html>

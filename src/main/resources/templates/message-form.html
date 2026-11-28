@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>쪽지 쓰기 | 팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/board.css}">
+    <link rel="stylesheet" th:href="@{/css/message.css}">
+</head>
+<body class="app">
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="container">
+    <section class="panel">
+        <h1>쪽지 쓰기</h1>
+
+        <p class="msg-error" th:if="${error}" th:text="${error}"></p>
+
+        <form th:action="@{/messages}" method="post">
+            <label for="receiverUsername">받는 사람 학번</label>
+            <input type="text" id="receiverUsername" name="receiverUsername" maxlength="30"
+                   th:value="${receiverUsername}" placeholder="받는 사람의 학번" required>
+            <p class="muted receiver-name" th:if="${receiverName != null}">
+                받는 사람: <b th:text="${receiverName}">이름</b>
+            </p>
+
+            <label for="content">내용 (1000자 이하)</label>
+            <textarea id="content" name="content" rows="8" maxlength="1000"
+                      placeholder="보낼 내용을 입력하세요." required th:text="${content}"></textarea>
+
+            <button type="submit" class="btn">보내기</button>
+        </form>
+    </section>
+
+    <p><a th:href="@{/messages}" class="back">← 쪽지함으로</a></p>
+</main>
+</body>
+</html>

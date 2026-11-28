@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>쪽지 | 팀 프로젝트 매칭</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+    <link rel="stylesheet" th:href="@{/css/board.css}">
+    <link rel="stylesheet" th:href="@{/css/message.css}">
+</head>
+<body class="app">
+<div th:replace="~{fragments :: navbar}"></div>
+
+<main class="container">
+    <section class="panel">
+        <h1>쪽지</h1>
+
+        <dl class="info">
+            <dt>보낸 사람</dt>
+            <dd><a th:href="@{/profile/{id}(id=${dm.sender.id})}" th:text="${dm.sender.nickname}">보낸 사람</a></dd>
+
+            <dt>받는 사람</dt>
+            <dd><a th:href="@{/profile/{id}(id=${dm.receiver.id})}" th:text="${dm.receiver.nickname}">받는 사람</a></dd>
+
+            <dt>보낸 시간</dt>
+            <dd th:text="${dm.createdText}">2026-11-28 10:00</dd>
+
+            <dt>내용</dt>
+            <dd class="pre" th:text="${dm.content}">내용</dd>
+        </dl>
+
+        <div class="actions">
+            <a th:if="${isReceiver}" th:href="@{/messages/new(to=${dm.sender.id})}" class="btn-link no-margin">답장</a>
+            <form th:action="@{/messages/{id}/delete(id=${dm.id})}" method="post"
+                  onsubmit="return confirm('이 쪽지를 삭제할까요? 상대방 쪽지함에는 남습니다.');">
+                <button type="submit" class="btn-danger">삭제</button>
+            </form>
+        </div>
+    </section>
+
+    <p><a th:href="@{/messages}" class="back">← 쪽지함으로</a></p>
+</main>
+</body>
+</html>

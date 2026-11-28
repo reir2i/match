@@ -10,11 +10,14 @@ public class GlobalModelAdvice {
 
     private final MemberRepository memberRepository;
     private final NotificationRepository notificationRepository;
+    private final DirectMessageRepository messageRepository;
 
     public GlobalModelAdvice(MemberRepository memberRepository,
-                             NotificationRepository notificationRepository) {
+                             NotificationRepository notificationRepository,
+                             DirectMessageRepository messageRepository) {
         this.memberRepository = memberRepository;
         this.notificationRepository = notificationRepository;
+        this.messageRepository = messageRepository;
     }
 
     @ModelAttribute("unreadCount")
@@ -24,6 +27,16 @@ public class GlobalModelAdvice {
         }
         return memberRepository.findByUsername(principal.getName())
                 .map(m -> notificationRepository.countByReceiverIdAndCheckedFalse(m.getId()))
+                .orElse(0L);
+    }
+
+    @ModelAttribute("unreadMessages")
+    public long unreadMessages(Principal principal) {
+        if (principal == null) {
+            return 0L;
+        }
+        return memberRepository.findByUsername(principal.getName())
+                .map(m -> messageRepository.countByReceiverIdAndCheckedFalseAndReceiverDeletedFalse(m.getId()))
                 .orElse(0L);
     }
 }

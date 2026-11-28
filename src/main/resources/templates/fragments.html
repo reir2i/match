@@ -20,6 +20,8 @@
     <nav class="nav-links">
         <a th:href="@{/}">홈</a>
         <a th:href="@{/applications/mine}">내 지원</a>
+        <a th:href="@{/messages}">쪽지<span class="nav-count"
+                                          th:if="${unreadMessages != null and unreadMessages > 0}" th:text="${unreadMessages}">1</span></a>
         <a th:href="@{/notifications}">알림<span class="nav-count"
                                                th:if="${unreadCount != null and unreadCount > 0}" th:text="${unreadCount}">1</span></a>
         <a th:href="@{/profile}">내 프로필</a>
