@@ -23,4 +23,11 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     @Modifying
     @Query("delete from Application a where a.post.id = :postId")
     void deleteByPostId(@Param("postId") Long postId);
+
+    @Query("select p from Post p where p.status = :closed and (p.author.id = :memberId or exists "
+            + "(select 1 from Application a where a.post.id = p.id and a.applicant.id = :memberId "
+            + "and a.status = :accepted)) order by p.createdAt desc")
+    List<Post> findChatRooms(@Param("memberId") Long memberId,
+                             @Param("closed") Post.Status closed,
+                             @Param("accepted") Application.Status accepted);
 }

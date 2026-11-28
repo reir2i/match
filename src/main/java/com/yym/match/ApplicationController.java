@@ -93,6 +93,9 @@ public class ApplicationController {
         Member me = currentMember(principal);
         model.addAttribute("applications",
                 applicationRepository.findByApplicantIdOrderByCreatedAtDesc(me.getId()));
+        model.addAttribute("rooms",
+                applicationRepository.findChatRooms(me.getId(), Post.Status.CLOSED, Application.Status.ACCEPTED));
+        model.addAttribute("meId", me.getId());
         return "my-applications";
     }
 }
