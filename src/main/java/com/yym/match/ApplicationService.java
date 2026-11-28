@@ -11,13 +11,16 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final PostRepository postRepository;
     private final ProfileRepository profileRepository;
+    private final NotificationService notificationService;
 
     public ApplicationService(ApplicationRepository applicationRepository,
                               PostRepository postRepository,
-                              ProfileRepository profileRepository) {
+                              ProfileRepository profileRepository,
+                              NotificationService notificationService) {
         this.applicationRepository = applicationRepository;
         this.postRepository = postRepository;
         this.profileRepository = profileRepository;
+        this.notificationService = notificationService;
     }
 
     private Application findApplication(Long id) {
@@ -55,6 +58,10 @@ public class ApplicationService {
         }
 
         applicationRepository.save(new Application(post, me, message));
+
+        notificationService.push(post.getAuthor(), Notification.Type.APPLY,
+                me.getNickname() + "님이 \"" + post.getTitle() + "\"에 지원했습니다.",
+                "/posts/" + postId);
     }
 
     @Transactional
@@ -76,6 +83,10 @@ public class ApplicationService {
         if (accepted + 1 >= post.getCapacity()) {
             post.close();
         }
+
+        notificationService.push(application.getApplicant(), Notification.Type.ACCEPT,
+                "\"" + post.getTitle() + "\" 지원이 수락되었습니다.",
+                "/posts/" + post.getId());
         return post.getId();
     }
 
@@ -83,13 +94,18 @@ public class ApplicationService {
     public Long reject(Long applicationId, Member me) {
         Application application = findApplication(applicationId);
         checkPostAuthor(application, me);
+        Post post = application.getPost();
 
         if (!application.isPending()) {
             throw new IllegalStateException("이미 처리된 지원입니다.");
         }
 
         application.reject();
-        return application.getPost().getId();
+
+        notificationService.push(application.getApplicant(), Notification.Type.REJECT,
+                "\"" + post.getTitle() + "\" 지원이 거절되었습니다.",
+                "/posts/" + post.getId());
+        return post.getId();
     }
 
     @Transactional

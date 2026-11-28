@@ -2,10 +2,26 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
 <header th:fragment="navbar" class="navbar">
+    <style>
+        .nav-count {
+            display: inline-block;
+            min-width: 20px;
+            margin-left: 4px;
+            padding: 1px 6px;
+            border-radius: 999px;
+            background: #dc2626;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+        }
+    </style>
     <a class="nav-brand" th:href="@{/}">🤝 팀 프로젝트 매칭</a>
     <nav class="nav-links">
         <a th:href="@{/}">홈</a>
         <a th:href="@{/applications/mine}">내 지원</a>
+        <a th:href="@{/notifications}">알림<span class="nav-count"
+                                               th:if="${unreadCount != null and unreadCount > 0}" th:text="${unreadCount}">1</span></a>
         <a th:href="@{/profile}">내 프로필</a>
         <form th:action="@{/logout}" method="post" class="nav-logout">
             <button type="submit">로그아웃</button>
