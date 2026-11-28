@@ -84,7 +84,6 @@ public class ProfileController {
                        @RequestParam("grade") Integer grade,
                        @RequestParam("intro") String intro,
                        @RequestParam("githubUrl") String githubUrl,
-                       @RequestParam("email") String email,
                        @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
                        Model model) {
 
@@ -93,7 +92,6 @@ public class ProfileController {
         department = department.trim();
         intro = intro.trim();
         githubUrl = githubUrl.trim();
-        email = email.trim();
 
         Set<Tag> tags = tagIds == null
                 ? new HashSet<>()
@@ -109,13 +107,11 @@ public class ProfileController {
         } else if (!githubUrl.isEmpty()
                 && !(githubUrl.startsWith("https://") || githubUrl.startsWith("http://"))) {
             error = "GitHub 링크는 https:// 로 시작해야 합니다.";
-        } else if (!email.isEmpty() && !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
-            error = "이메일 형식이 올바르지 않습니다.";
         }
 
         if (error != null) {
             Profile temp = new Profile(me);
-            temp.update(department, grade, intro, githubUrl, email, tags);
+            temp.update(department, grade, intro, githubUrl, "", tags);
             model.addAttribute("error", error);
             model.addAttribute("profile", temp);
             model.addAttribute("allTags", tagRepository.findAll(Sort.by("id")));
@@ -126,7 +122,7 @@ public class ProfileController {
 
         Profile profile = profileRepository.findByMemberId(me.getId())
                 .orElseGet(() -> new Profile(me));
-        profile.update(department, grade, intro, githubUrl, email, tags);
+        profile.update(department, grade, intro, githubUrl, "", tags);
         profileRepository.save(profile);
 
         return "redirect:/profile";

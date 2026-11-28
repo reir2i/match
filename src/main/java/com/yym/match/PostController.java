@@ -23,18 +23,15 @@ public class PostController {
 
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
-    private final CommentRepository commentRepository;
     private final TagRepository tagRepository;
     private final ApplicationRepository applicationRepository;
 
     public PostController(MemberRepository memberRepository,
                           PostRepository postRepository,
-                          CommentRepository commentRepository,
                           TagRepository tagRepository,
                           ApplicationRepository applicationRepository) {
         this.memberRepository = memberRepository;
         this.postRepository = postRepository;
-        this.commentRepository = commentRepository;
         this.tagRepository = tagRepository;
         this.applicationRepository = applicationRepository;
     }
@@ -124,9 +121,7 @@ public class PostController {
         boolean isAuthor = post.getAuthor().getId().equals(me.getId());
 
         model.addAttribute("post", post);
-        model.addAttribute("comments", commentRepository.findByPostIdOrderByCreatedAtAsc(id));
         model.addAttribute("isAuthor", isAuthor);
-        model.addAttribute("meId", me.getId());
 
         model.addAttribute("applications",
                 isAuthor ? applicationRepository.findByPostIdOrderByCreatedAtAsc(id) : List.of());
@@ -186,33 +181,5 @@ public class PostController {
         applicationRepository.deleteByPostId(id);
         postRepository.delete(post);
         return "redirect:/";
-    }
-
-    @PostMapping("/posts/{id}/comments")
-    public String addComment(@PathVariable("id") Long id, Principal principal,
-                             @RequestParam("content") String content) {
-        Member me = currentMember(principal);
-        Post post = findPost(id);
-
-        content = content.trim();
-        if (!content.isEmpty() && content.length() <= 500) {
-            commentRepository.save(new Comment(post, me, content));
-        }
-        return "redirect:/posts/" + id;
-    }
-
-    @PostMapping("/posts/{id}/comments/{commentId}/delete")
-    public String deleteComment(@PathVariable("id") Long id,
-                                @PathVariable("commentId") Long commentId,
-                                Principal principal) {
-        Member me = currentMember(principal);
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-
-        if (!comment.getAuthor().getId().equals(me.getId())) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-        commentRepository.delete(comment);
-        return "redirect:/posts/" + id;
     }
 }

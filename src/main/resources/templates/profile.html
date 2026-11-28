@@ -37,9 +37,6 @@
                 <dd th:if="${profile.githubUrl != null and !#strings.isEmpty(profile.githubUrl)}">
                     <a th:href="${profile.githubUrl}" th:text="${profile.githubUrl}" target="_blank" rel="noopener">링크</a>
                 </dd>
-
-                <dt th:if="${mine}">이메일 (나에게만 보임)</dt>
-                <dd th:if="${mine}" th:text="${#strings.isEmpty(profile.email) ? '입력하지 않음' : profile.email}">메일</dd>
             </dl>
         </div>
 
